@@ -537,7 +537,7 @@ const quizData = [
     ],
     answer: "政府による投資と保護育成政策の結果、二大航空会社が市場を独占する状態に至った",
     explanation: "日本の航空業界は、戦後の再開時から政府の強い関与のもとで発展してきました。日本航空（JAL）は国策会社として国際線と主要国内線を、全日本空輸（ANA）は国内線中心に育成されるなど、政府による保護育成政策の結果、この二大航空会社が市場の大部分を占める寡占状態となりました。純粋な自由競争だけで現在の状況に至ったわけではありません。航空業界は設備投資や安全基準など参入障壁が極めて高く、頻繁な参入・退出がある業界ではありません。"
-  }
+  }, // ★ ここにカンマが抜けていました！
   {
     question: "寡占市場の特徴として当てはまるものは、次のうちどれか。",
     options: [
@@ -692,7 +692,7 @@ const quizData = [
     answer: "患者自身が支払えない高額医療費と分かっていても、保険会社が支払ってくれるだろうと考える医師が必要以上に高額な治療をおこなう",
     explanation: "モラルハザードとは、ある主体が保険に加入するなどしてリスクが低減された結果、その主体がリスクを取る行動（不注意、過剰な利用など）を増加させる現象です。この場合、医師が保険でカバーされることを前提に、患者にとって過剰な治療を行うことがモラルハザードに該当します。他の選択肢は、リスク管理やリスク回避の行動です。"
   },
- {
+  {
     question: "逆選択に当てはまらないのは、次のうちどれか。(訂正済み)",
     options: [
       "健康な人ほど医療保険に加入せず、病気のリスクの高い人ばかりが医療保険に加入する",
@@ -702,7 +702,7 @@ const quizData = [
     ],
     answer: "住宅ローン市場において、高収入の人だけがローン申請するようになり、低収入の人はローン市場から排除される",
     explanation: "逆選択とは、情報の非対称性によって、高リスクの対象ばかりが市場に集まってしまう現象です。医療保険と中古車は逆選択の典型例です。住宅ローンは、金融機関が審査により低収入者を除外するリスク管理の結果であり、情報の非対称性による逆選択ではありません。グレシャムの法則は貨幣の流通に関する法則であり、逆選択とは関連しません。"
-  }
+  },
   {
     question: "情報の非対称性問題を改善しようとするシグナリングに当てはまるのは、次のうちどれか。",
     options: [
@@ -1151,9 +1151,14 @@ function displayQuestion(index) {
   // 問題と解答状況表示領域を作成
   const quizSummary = document.createElement("div");
   quizSummary.id = "quiz-summary";
+  // ★ 修正点1: quizSummaryのinnerHTML生成時に直接値を設定
+  const currentCorrectCount = correctAnswers;
+  const totalQuizQuestions = quizData.length;
+  const currentAccuracy = totalQuizQuestions > 0 ? (currentCorrectCount / totalQuizQuestions) * 100 : 0;
+
   quizSummary.innerHTML = `
-    <p>解答状況: <span id="answered-count">${correctAnswers}</span> / <span id="total-count">${quizData.length}</span> 問正解</p>
-    <p>正答率: <span id="accuracy-rate">${((correctAnswers / quizData.length) * 100).toFixed(2)}</span> %</p>
+    <p>解答状況: <span id="answered-count">${currentCorrectCount}</span> / <span id="total-count">${totalQuizQuestions}</span> 問正解</p>
+    <p>正答率: <span id="accuracy-rate">${currentAccuracy.toFixed(2)}</span> %</p>
   `;
   questionContainer.appendChild(quizSummary);
 
@@ -1331,6 +1336,9 @@ function setupEventListeners() {
 
 // 解答状況を表示する関数
 function updateQuizSummary() {
+  // ★ 修正点2: `updateQuizSummary` は要素が既にDOMに存在することを前提とする
+  // `displayQuestion` が呼ばれるたびに要素が再生成されるため、
+  // この関数は主に解答確認後に数を更新するために使用する
   document.getElementById("answered-count").textContent = correctAnswers;
   document.getElementById("total-count").textContent = quizData.length;
   const accuracy = quizData.length > 0 ? (correctAnswers / quizData.length) * 100 : 0;
@@ -1378,4 +1386,7 @@ modeToggleBtn.addEventListener('click', () => {
 
 // 初回ロード時に最初の問題を表示
 displayQuestion(currentQuestionIndex);
-updateQuizSummary(); // 初期状態の解答状況を表示
+// ★ 修正点3: ここでの `updateQuizSummary()` は不要になりました。
+// `displayQuestion` 関数内で `quizSummary` が生成される際に、
+// 初期値が設定されるためです。
+// updateQuizSummary();
